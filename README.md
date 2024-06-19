@@ -553,9 +553,8 @@ $ cat /etc/crontab
 Example Network:
 
 
-Kali          →       CLIENT01         →        WEB01           →          DC01
-192.168.45.228        192.168.190.215        172.16.190.26           172.16.190.100
-                      172.16.190.77
+![image](https://github.com/kullaisec/OSCP/assets/99985908/2323c1ef-c63f-4c5e-a4fa-7dc0ae107622)
+
                       
 
 
