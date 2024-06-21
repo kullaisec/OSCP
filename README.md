@@ -1,5 +1,5 @@
 # OSCP
-Just for simplicity and fastness
+Kullaisec - Just for simplicity and fastness
 
 ## Commands 
 
