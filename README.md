@@ -539,6 +539,13 @@ SUID:
 ```
 $ find / -perm -u=s -type f 2>/dev/null
 ```
+Capabilities:
+
+```
+$ /usr/sbin/getcap -r / 2>/dev/null
+```
+
+go to gtfobins and exploit !!
 Services Exploits:
 ```
 $ ps aux | grep "^root"
