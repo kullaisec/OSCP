@@ -1,11 +1,11 @@
 # OSCP
 Kullaisec - Just for simplicity and fastness
 
-Windows : https://kullaisec.github.io/OSCP/oscp-windows-pg.ctb.pdf
+[[Windows PG](https://kullaisec.github.io/OSCP/oscp-windows-pg.ctb.pdf)]
 
-Linux : https://kullaisec.github.io/OSCP/oscp-linux-pg.ctb.pdf
+[[Linux PG](https://kullaisec.github.io/OSCP/oscp-linux-pg.ctb.pdf)]
 
-AD : https://kullaisec.github.io/OSCP/oscp-AD-pg.ctb.pdf
+[[AD PG](https://kullaisec.github.io/OSCP/oscp-AD-pg.ctb.pdf)]
 
 ## Commands 
 
