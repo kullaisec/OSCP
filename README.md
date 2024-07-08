@@ -256,6 +256,10 @@ Enum Local users:
 ```powershell
 net users
 ```
+```powershell
+net user
+PS> Get-LocalUser
+```
 Enum Domain users:
 ```powershell
 net users /domain
