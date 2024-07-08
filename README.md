@@ -855,7 +855,14 @@ and Now open the RDP session and enter windows + U and you will get adminstrator
 
 # rdesktop DC01.heist.offsec
 ```
+### Installed Applications x64 and x86
+```powershell
+x86
+PS> Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname
 
+x64
+PS> Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname
+```
 
 ## Windows Path Setting
 
