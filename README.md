@@ -95,6 +95,13 @@ smbclient //server/share
 smbclient //server/share -U <username>
 smbclient //server/share -U domain/username
 
+# Get all files in s folder for better enumration !!
+
+sudo mkdir -p /mnt/shenzi
+sudo umount /mnt/shenzi
+sudo mount -t cifs //192.168.194.55/Shenzi /mnt/shenzi -o username=guest
+sudo mount -t cifs //192.168.194.55/Shenzi /mnt/shenzi -o username=guest,password=guest
+
 #SMBmap
 smbmap -H <target_ip>
 smbmap -H <target_ip> -u <username> -p <password>
