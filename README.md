@@ -1308,7 +1308,22 @@ After Exploitation:
 
 ![image](https://github.com/kullaisec/OSCP/assets/99985908/536fc075-092c-44d8-b8f9-70217e1db1bd)
 
+### Port Forwarding:[Windows Using `Plink.exe`]
 
+The general format of a port forwarding command using
+plink.exe:
+
+```powershell
+PS> .\plink.exe <user>@<kali> -R <kaliport>:<target-IP>:<target-port>
+```
+Note that the <target-IP> is usually local (e.g. 127.0.0.1). plink.exe requires you to SSH to Kali, and then uses the SSH
+tunnel to forward ports.
+
+Start ssh on kali..
+
+```powershell
+sudo systemctl start ssh
+```
 
 ## Linux PrivEsc:
 
@@ -1368,7 +1383,7 @@ $ <program> -v
 $ dpkg -l | grep <program>
 ```
 
-Port Forwarding:
+Port Forwarding:[Linux]
 ```powershell
 $ netstat -nl
 ```
