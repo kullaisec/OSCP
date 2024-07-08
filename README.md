@@ -1016,6 +1016,14 @@ sc config <service> <option>="<value>" #change the path to the reverseshell loca
 sc start <servicename>
 ```
 
+### SeShutdownPrivilege
+
+If we have this Privilege then If any binary we are unable to start or Stop it is set as AUTO then we can reboot the system and it get executed afetr the reboot
+
+```powershell
+shutdown /r /t 0
+```
+
 ### Powershell History
 
 ```powershell
@@ -1118,6 +1126,19 @@ dir /s/b *.txt
 windows tree:
 
 tree /f /a
+```
+
+### .kdbx Files and other important Manual
+
+```powershell
+PS> Get-ChildItem -Path C:\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue
+
+# Xampp
+PS> Get-ChildItem -Path C:\xampp -Include *.txt,*.ini -File -Recurse -ErrorAction SilentlyContinue
+
+# pdf txt... files
+
+PS> Get-ChildItem -Path C:\Users\dave\ -Include *.txt,*.pdf,*.xls,*.xlsx,*.doc,*.docx -File -Recurse -ErrorAction SilentlyContinue 
 ```
 
 ### AlwaysInstallElevated
