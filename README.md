@@ -586,8 +586,6 @@ Just Upload via SMB CLIENT and listen via Responder you will get the NTLM Hash !
 ```
 
 
-
-
 #### Search anywhere file in windows:
 ```powershell
 > dir /s/b \local.txt
@@ -998,6 +996,9 @@ PS> net stop KiteService
 PS> net start KiteService
 ```
 ### Windows Binary PrivEscs:[Binary Hijacking]
+
+![image](https://github.com/kullaisec/OSCP/assets/99985908/fd5358ad-18df-4c23-9ea9-ed4dec6fa512)
+
 
 ```powershell
 #Identify service from winpeas
