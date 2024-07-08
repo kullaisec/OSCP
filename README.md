@@ -346,7 +346,37 @@ Invoke-UserHunter -CheckAccess
 3. Get-netloggedon and get-netsession on each computers 
 3. Get-netloggedon and get-netsession on each computers 
 4. Search if there is a Active Domain Admins session in any Computers. 
-5. See if your user id a local admin on the machine that have the DA session  
+5. See if your user id a local admin on the machine that have the DA session
+
+```
+> Import-Module .\PowerView.ps1
+
+Enumerate some details about the OS:
+> Get-NetDomain
+> Get-NetComputer
+> Get-NetComputer | select operatingsystem,dnshostname
+
+Enumerate all users details 
+> Get-NetUser
+
+Enumerate only users names
+> Get-NetUser | select cn
+
+Enumerate users who changed password last
+> Get-NetUser | select cn,pwdlastset,lastlogon
+
+Enumerate the Group members
+> Get-NetGroup "GROUP_NAME" | select member
+
+Enumerate current user has administrative permissions on any computers in the domain
+> Find-LocalAdminAccess
+
+Enumerate loggedin users
+syntax: Name.corp.com
+> Get-NetSession -ComputerName <Name>
+> Get-NetSession -ComputerName <Name> -Verbose
+
+```
 
 Finding IP of particular servers:
 ```powershell
