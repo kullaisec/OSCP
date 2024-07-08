@@ -581,7 +581,7 @@ Just Upload via SMB CLIENT and listen via Responder you will get the NTLM Hash !
 
 ![image](https://github.com/kullaisec/OSCP/assets/99985908/81dec7e5-1334-4009-8ae6-412b2943ec6a)
 
-```powershell
+```bash
 # netexec ldap 192.168.225.122 -u username -p password --kdcHost HUTCHDC[see image] -M laps
 ```
 
