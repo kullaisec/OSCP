@@ -231,6 +231,12 @@ netshareenum #Share enumeration, this only comesup if the current user we're log
 netshareenumall
 lsaenumsid #SID of all users
 ```
+### winexe
+
+```powershell
+# winexe -U 'admin%password123' //192.168.200.141 cmd.exe
+# winexe -U 'admin%password123' --system //192.168.200.141 cmd.exe
+```
 
 ### MSFVENOM
 ```powershell
