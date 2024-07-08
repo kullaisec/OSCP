@@ -348,7 +348,7 @@ Invoke-UserHunter -CheckAccess
 4. Search if there is a Active Domain Admins session in any Computers. 
 5. See if your user id a local admin on the machine that have the DA session
 
-```
+```powershell
 > Import-Module .\PowerView.ps1
 
 Enumerate some details about the OS:
@@ -376,6 +376,11 @@ syntax: Name.corp.com
 > Get-NetSession -ComputerName <Name>
 > Get-NetSession -ComputerName <Name> -Verbose
 
+```
+### PsLoggedon
+```powerhell
+# To see user logons at remote system of a domain(external tool)
+.\PsLoggedon.exe \\<computername>
 ```
 
 Finding IP of particular servers:
