@@ -1732,6 +1732,18 @@ $ uname -a
 
 → Leaks kernel details search for exploits
 
+## Basic Checks
+```
+find / -writable -type d 2>/dev/null
+dpkg -l #Installed applications on debian system
+cat /etc/fstab #Listing mounted drives
+lsblk #Listing all available drives
+lsmod #Listing loaded drivers
+
+watch -n 1 "ps -aux | grep pass" #Checking processes for credentials
+sudo tcpdump -i lo -A | grep "pass" #Password sniffing using tcpdump
+```
+
 SUID:
 ```powershell
 $ find / -perm -u=s -type f 2>/dev/null
