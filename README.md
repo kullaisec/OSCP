@@ -1270,7 +1270,11 @@ atexec.py -hashes aad3b435b51404eeaad3b435b51404ee:5fbc3d5fec8206a30f4b6c473d68a
 
 ### PSSession
 ```powershell
-$pass = ConvertTo-SecureString 'Freedom1' -AsPlainText -Force                                                                                $cred = New-Object System.Management.Automation.PSCredential('oscp.exam\support', $pass)                                                     Enter-PSSession -computer 192.168.159.153 -Credential $cred
+$pass = ConvertTo-SecureString 'Freedom1' -AsPlainText -Force
+
+$cred = New-Object System.Management.Automation.PSCredential('oscp.exam\support', $pass)
+
+Enter-PSSession -computer 192.168.159.153 -Credential $cred
 ```
 
 
