@@ -482,6 +482,16 @@ Linux:
 sudo neo4j start
 and start the bloodhound !!
 
+Custom queries:
+
+#displayes all computers
+MATCH (m:Computer) RETURN m
+
+#display all users
+MATCH (m:User) RETURN m
+
+#display all active sessions
+MATCH p = (c:Computer)-[:HasSession]->(m:User) RETURN p
 
 ```
 
