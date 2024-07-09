@@ -1530,7 +1530,7 @@ runas /savecred /user:admin C:\Temp\reverse.exe
 
 ### Manul Files checking 
 
-```powershell
+```javascript
 Search for them 
 
 findstr /si password *.txt 
@@ -1562,6 +1562,11 @@ dir c:\*vnc.ini /s /b
 dir c:\*ultravnc.ini /s /b  
 dir c:\ /s /b | findstr /si *vnc.ini
 
+### Most important to check manually !!
+
+C:\Users>dir /s/b c:\*.kdbx
+C:\Users>dir /s/b c:\*.zip
+C:\Users>dir /s/b c:\*.doc*
 
 dir /s/b *.txt
 
