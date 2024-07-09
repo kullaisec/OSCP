@@ -1805,8 +1805,22 @@ SUDO:
 $ sudo -l
 ```
 Cron:
-```powershell
-$ cat /etc/crontab
+```bash
+#Detecting Cronjobs
+cat /etc/crontab
+crontab -l
+
+#handy tool to livemonitor stuff happening in Linux
+pspy32 and pspy64
+Give executable permissions and then execute them !!
+./pspy32
+./pspy64
+# timeout 60s pspy32
+# timeout 60s pspy64
+
+Best tools for detecting cron jobs with some elevated permissions 
+
+grep "CRON" /var/log/syslog #inspecting cron logs
 ```
 
 ## Ligolo Pivoting 
