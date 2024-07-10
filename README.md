@@ -163,6 +163,7 @@ python3 windapsearch.py --dc-ip <IP address> -u <username> -p <password> --privi
 ```powershell
 nmap -sV --script=nfs-showmount <IP>
 showmount -e <IP>
+showmount -a <IP>
 ```
 If You found anythign Intresting Mount is accessiable for everyone mount that file locally and enumerate !!
 
@@ -476,7 +477,9 @@ bloodhound-python -u <username> -d <domain_name> -c all -v -ns $IP
 
 #Windows:
 PS> Import-Module .\Sharphound.ps1
-PS> Invoke-BloodHound -CollectionMethod All -OutputDirectory C:\Users\Public\Temp\ -OutputPrefix "corp audit"
+PS> Invoke-BloodHound -CollectionMethod All -OutputDirectory C:\Users\Public\Temp\ -OutputPrefix "corp_audit"
+
+PS> SharpHound.exe -c All  --OutputPrefix "corp_audit"
 
 Linux:
 sudo neo4j start
